@@ -2,7 +2,8 @@ import React from 'react'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterAll, beforeAll, beforeEach, expect, it, vi } from 'vitest'
 import SettingsMain from '@/components/settings/SettingsMain'
-const mocks = vi.hoisted(() => ({ save: vi.fn(), push: vi.fn(), setActiveSection: vi.fn() }))
+import { browserStorage } from '@/shared/storage'
+const mocks = vi.hoisted(() => ({ save: vi.fn(), push: vi.fn(), setActiveSection: vi.fn(), unsaved: true }))
 vi.mock('next/navigation', () => ({
   usePathname: () => '/settings/appearance',
   useRouter: () => ({ push: mocks.push }),
@@ -10,7 +11,7 @@ vi.mock('next/navigation', () => ({
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 vi.mock('@/features/settings/store/SettingsStore', () => ({
   useSettings: () => ({
-    hasUnsavedChanges: true,
+    hasUnsavedChanges: mocks.unsaved,
     saveDraft: mocks.save,
     saving: false,
     applying: false,
@@ -38,6 +39,7 @@ afterAll(() => {
 beforeEach(() => {
   mocks.save.mockReset()
   mocks.push.mockReset()
+  mocks.unsaved = true
 })
 it.each([null, true, false])(
   'handles save-before-leave result %s without confusing cancellation and failure',
@@ -58,3 +60,32 @@ it.each([null, true, false])(
     else expect(screen.queryByRole('alert')).toBeNull()
   }
 )
+
+it.each([
+  '/hybridaction/zybTrackerStatisticsAction?data=%7B%7D&__callback__=test',
+  '/unknown-page',
+  '/learning-unrelated',
+  '/api/settings',
+  '/login',
+  '/settings/general',
+  '//example.com',
+  '/\\example.com',
+])('returns home and clears an invalid remembered destination: %s', destination => {
+  mocks.unsaved = false
+  browserStorage.writeRaw('session', 'deeptutor:settings-return', destination)
+  browserStorage.writeRaw('session', 'deeptutor:unrelated', 'keep')
+  render(<SettingsMain><p>Appearance settings</p></SettingsMain>)
+  fireEvent.click(screen.getAllByRole('button', { name: 'Back to app' })[0])
+  expect(mocks.push).toHaveBeenCalledWith('/')
+  expect(browserStorage.readRaw('session', 'deeptutor:settings-return')).toBeNull()
+  expect(browserStorage.readRaw('session', 'deeptutor:unrelated')).toBe('keep')
+})
+
+it('returns to the remembered book page with its query and fragment', () => {
+  mocks.unsaved = false
+  const destination = '/learning/books/book-1?tab=notes#page-3'
+  browserStorage.writeRaw('session', 'deeptutor:settings-return', destination)
+  render(<SettingsMain><p>Appearance settings</p></SettingsMain>)
+  fireEvent.click(screen.getAllByRole('button', { name: 'Back to app' })[0])
+  expect(mocks.push).toHaveBeenCalledWith(destination)
+})
