@@ -59,7 +59,7 @@ _NATIVE_TOOL_BLOCKED_BINDINGS: frozenset[str] = frozenset(
 # AsyncOpenAI client pointed at a non-OpenAI wire format. github_copilot is
 # adapter-routed but deliberately excluded from this set.
 _NATIVE_TOOL_BACKENDS: frozenset[str] = frozenset(
-    {"anthropic", "openai_codex", "codebuddy", "claude_code"}
+    {"anthropic", "openai_codex", "openai_chatgpt", "codebuddy", "claude_code"}
 )
 _AGENTIC_CLIENT_POOL_MAXSIZE = 2
 _agentic_client_pool: "OrderedDict[tuple[Any, ...], Any]" = OrderedDict()
@@ -326,6 +326,14 @@ def _build_anthropic_adapter(config: LLMClientConfig, spec: Any) -> Any:
     return _ProviderOpenAIAdapter(anthropic_provider)
 
 
+def _build_chatgpt_adapter(config: LLMClientConfig, spec: Any) -> Any:
+    from deeptutor.services.llm.provider_core.openai_chatgpt_provider import OpenAIChatGPTProvider
+
+    if not config.model:
+        raise ValueError("Choose a model from the ChatGPT (SIWC) account catalog.")
+    return _ProviderOpenAIAdapter(OpenAIChatGPTProvider(default_model=config.model))
+
+
 def _build_codex_adapter(config: LLMClientConfig, spec: Any) -> Any:
     from deeptutor.services.codex_auth.constants import CODEX_DEFAULT_MODEL_ID
     from deeptutor.services.llm.provider_core import OpenAICodexProvider
@@ -382,6 +390,7 @@ def _build_direct_openai_adapter(config: LLMClientConfig, spec: Any) -> Any:
 _NATIVE_ADAPTER_BUILDERS: dict[str, Callable[[LLMClientConfig, Any], Any]] = {
     "anthropic": _build_anthropic_adapter,
     "openai_codex": _build_codex_adapter,
+    "openai_chatgpt": _build_chatgpt_adapter,
     "github_copilot": _build_copilot_adapter,
     "codebuddy": _build_codebuddy_adapter,
     "claude_code": _build_claude_code_adapter,
