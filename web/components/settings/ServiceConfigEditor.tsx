@@ -26,6 +26,7 @@ import {
   reasoningEffortOptionsFromSupportedLevels,
 } from "@/lib/reasoning-effort";
 import { CodexOAuthCard } from "./CodexOAuthCard";
+import { ChatGPTAuthCard } from "./ChatGPTAuthCard";
 import { CodeBuddyAuthCard } from "./CodeBuddyAuthCard";
 import {
   isBoundManagedCodexProfile,
@@ -1537,7 +1538,7 @@ function ProfileFields({
   };
 
   const fields =
-    isCodexOAuth || isCliLogin
+    isCodexOAuth || isCliLogin || providerValue === "openai_chatgpt"
       ? { apiKey: false, baseUrl: false, baseUrlRequired: false }
       : service === "search"
         ? searchProviderFields(profile.provider, providerOption)
@@ -1692,6 +1693,9 @@ function ProfileFields({
           <CodexOAuthCard />
         </div>
       )}
+      {service === "llm" && providerValue === "openai_chatgpt" && (
+        <div className="sm:col-span-2"><ChatGPTAuthCard /></div>
+      )}
       {isCodeBuddyAuth && (
         <div className="sm:col-span-2">
           <CodeBuddyAuthCard />
@@ -1755,7 +1759,7 @@ function ProfileFields({
           </div>
         </div>
       )}
-      {!isCodexOAuth && !isCliLogin && (
+      {!isCodexOAuth && !isCliLogin && providerValue !== "openai_chatgpt" && (
         <details
           key={providerValue}
           open={showConnectionOptions}

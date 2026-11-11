@@ -3,31 +3,26 @@
 import { useEffect } from "react";
 import { browserStorage } from "@/shared/storage";
 import { usePathname } from "next/navigation";
+import { SETTINGS_RETURN_KEY, settingsReturnPath } from "@/lib/settings-return";
 
-export const SETTINGS_RETURN_KEY = "deeptutor:settings-return";
+export { SETTINGS_RETURN_KEY } from "@/lib/settings-return";
 
 /** Session-only navigation state; never touches a user's configuration. */
 export default function SettingsReturnTracker() {
   const pathname = usePathname();
   useEffect(() => {
-    if (
-      !pathname ||
-      pathname === "/settings" ||
-      pathname.startsWith("/settings/")
-    )
-      return;
-    if (pathname.startsWith("/login") || pathname.startsWith("/register"))
-      return;
+    if (!pathname) return;
     // Without the workspace: returning from Settings stays in whichever
     // workspace the tab is in by then, instead of switching back.
-    const query = new URLSearchParams(window.location.search);
-    query.delete("dt_workspace");
-    query.delete("workspace");
+    const destination = settingsReturnPath(
+      pathname + window.location.search + window.location.hash,
+    );
+    if (!destination) return;
     try {
       browserStorage.writeRaw(
         "session",
         SETTINGS_RETURN_KEY,
-        pathname + (query.size ? `?${query}` : "") + window.location.hash,
+        destination,
       );
     } catch {
       /* Storage can be disabled. Returning home remains available. */

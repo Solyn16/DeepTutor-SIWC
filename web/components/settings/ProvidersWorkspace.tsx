@@ -36,6 +36,7 @@ import {
 import { ProviderServices } from "./ProviderServices";
 import { AddProviderPanel, ProviderProtocol, type CustomProviderInput } from "./AddProviderPanel";
 import { CodexOAuthCard } from "./CodexOAuthCard";
+import { ChatGPTAuthCard } from "./ChatGPTAuthCard";
 import { CodeBuddyAuthCard } from "./CodeBuddyAuthCard";
 import { stringifyExtraHeaders, subPanelClass } from "./shared";
 import {
@@ -120,7 +121,7 @@ export function ProvidersWorkspace() {
   const optionLabel = (provider: string) => formatProviderLabel(provider, options.find(p => p.value === provider)?.label ?? provider, uiLanguage);
   const source = sources.find((p) => p.id === selected);
   const option = options.find((p) => p.value === source?.provider);
-  const managed = source?.provider === "openai_codex";
+  const managed = source?.provider === "openai_codex" || source?.provider === "openai_chatgpt";
   const connection = source?.source;
   const apiFormat = connection?.api_format ||
     (option?.default_api_format as CatalogConnection["api_format"]) || "auto";
@@ -136,8 +137,8 @@ export function ProvidersWorkspace() {
   const create = (custom?: CustomProviderInput) => {
     const option = addableOptions.find((o) => o.value === vendor);
     if (!option) return;
-    if (option.value === "openai_codex") {
-      setAuth("openai_codex");
+    if (option.value === "openai_codex" || option.value === "openai_chatgpt") {
+      setAuth(option.value);
       setAdding(false);
       syncQuery({ add: null });
       return;
@@ -264,7 +265,9 @@ export function ProvidersWorkspace() {
         }
         detail={
           <div ref={editorRef} className="min-w-0 scroll-mt-4">
-            {auth === "openai_codex" ? (
+            {auth === "openai_chatgpt" ? (
+              <ChatGPTAuthCard />
+            ) : auth === "openai_codex" ? (
               <CodexOAuthCard />
             ) : source && connection ? (
               <section
@@ -289,7 +292,9 @@ export function ProvidersWorkspace() {
                   </p>
                 </header>
                 <div className="space-y-6 p-4 sm:p-6">
-                  {managed ? (
+                  {source.provider === "openai_chatgpt" ? (
+                    <ChatGPTAuthCard />
+                  ) : managed ? (
                     <CodexOAuthCard />
                   ) : (
                     <>

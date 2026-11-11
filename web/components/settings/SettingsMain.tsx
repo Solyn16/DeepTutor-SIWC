@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import SettingsNav from './SettingsNav'
 import { SettingsToolbar } from './SettingsToolbar'
 import { SettingsLoadStatusBanner } from './SettingsLoadStatusBanner'
-import { SETTINGS_RETURN_KEY } from './SettingsReturnTracker'
+import { SETTINGS_RETURN_KEY, settingsReturnPath } from '@/lib/settings-return'
 import Modal from '@/components/common/Modal'
 import { useSettings } from '@/features/settings/store/SettingsStore'
 
@@ -37,8 +37,9 @@ export default function SettingsMain({ children }: { children: React.ReactNode }
     let destination = '/'
     try {
       const stored = browserStorage.readRaw('session', SETTINGS_RETURN_KEY)
-      if (stored?.startsWith('/') && !stored.startsWith('//') && !stored.startsWith('/settings'))
-        destination = stored
+      const valid = settingsReturnPath(stored)
+      if (valid) destination = valid
+      else if (stored) browserStorage.removeRaw('session', SETTINGS_RETURN_KEY)
     } catch {
       /* Home is a safe fallback. */
     }
