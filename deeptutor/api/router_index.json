@@ -1,5 +1,5 @@
 {
-  "fingerprint": "b3ff4a2963d642a226ba3b8fd034f616c878ec27cdb071e720e82674dabd3b75",
+  "fingerprint": "a68e9e36053e5b4f870505d32f458fe15abd0e3bb8b457e99e88d4349876af2c",
   "routers": {
     "deeptutor.api.routers.auth:router": [
       {
@@ -3478,6 +3478,15 @@
         "name": "start_openai_codex_oauth",
         "kind": "http",
         "methods": [
+          "POST"
+        ]
+      },
+      {
+        "path": "/providers/openai-chatgpt/{action}",
+        "name": "chatgpt_siwc_action",
+        "kind": "http",
+        "methods": [
+          "GET",
           "POST"
         ]
       },
