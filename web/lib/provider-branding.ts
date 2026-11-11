@@ -49,6 +49,7 @@ export const PROVIDER_ICONS: Readonly<Record<string, ProviderIconSpec>> = {
   onomeo: { file: "onomeo.svg" },
   openai: { file: "openai.svg", mono: true },
   openai_codex: { file: "openai.svg", mono: true },
+  openai_chatgpt: { file: "openai.svg", mono: true },
   openrouter: { file: "openrouter.svg", mono: true },
   orcarouter: { file: "orcarouter.png" },
   ovms: { file: "openvino.ico" },
