@@ -28,19 +28,29 @@ function providerLabel(option: LLMOption) {
   );
 }
 
+function modelDisplayName(option: LLMOption) {
+  if (option.provider === "openai_chatgpt") {
+    const name = option.model_name.trim();
+    if (name && !name.startsWith("openai_chatgpt/")) return name;
+    return option.model.replace(/^openai_chatgpt\/[^/]+\/?/, "") || "ChatGPT";
+  }
+  return option.model || option.model_name;
+}
+
 function ModelOptionRow({
   option,
   selected,
+  secondaryLabel,
   onSelect,
 }: {
   option: LLMOption;
   selected: boolean;
+  secondaryLabel: string;
   onSelect: () => void;
 }) {
   const { t } = useTranslation();
-  // Official model ID as the primary label (what gets sent to the API),
-  // per design. The user-given nickname and profile live in the tooltip.
-  const modelLabel = option.model || option.model_name;
+  // SIWC's model field includes account routing. Keep it out of display labels.
+  const modelLabel = modelDisplayName(option);
   const contextWindow = formatContextWindow(option.context_window);
   // Long model ids ("google/gemini-3-flash-preview") get ellipsized by the
   // inline layout; hovering the row reveals the full id as an overlay. The
@@ -51,7 +61,8 @@ function ModelOptionRow({
   return (
     <button
       type="button"
-      aria-label={`${option.model_name} | ${option.profile_name}`}
+      aria-label={`${option.provider === "openai_chatgpt" ? modelLabel : option.model_name} | ${option.provider === "openai_chatgpt" ? secondaryLabel : option.profile_name}`}
+      title={option.provider === "openai_chatgpt" ? `${modelLabel} · ${secondaryLabel}` : undefined}
       onClick={onSelect}
       onMouseEnter={() => {
         const el = nameRef.current;
@@ -71,7 +82,7 @@ function ModelOptionRow({
       />
       <span
         ref={nameRef}
-        className="min-w-0 truncate text-[12.5px] font-medium text-[var(--foreground)]"
+        className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-[var(--foreground)]"
       >
         {modelLabel}
       </span>
@@ -80,8 +91,8 @@ function ModelOptionRow({
           {t("Default")}
         </span>
       )}
-      <span className="min-w-0 flex-1 truncate text-[11px] text-[var(--muted-foreground)]">
-        {providerLabel(option)}
+      <span className="max-w-[84px] shrink-0 truncate text-[11px] text-[var(--muted-foreground)]">
+        {secondaryLabel}
       </span>
       {contextWindow ? (
         <span className="shrink-0 text-[11px] text-[var(--muted-foreground)]">
@@ -153,6 +164,18 @@ export default function ModelSelector({
       null,
     [options, selectedSelection],
   );
+  const chatgptProfiles = useMemo(
+    () => [...new Set(options.filter(option => option.provider === "openai_chatgpt").map(option => option.profile_id))],
+    [options],
+  );
+  const secondaryLabel = (option: LLMOption) => {
+    if (option.provider !== "openai_chatgpt") return providerLabel(option);
+    const name = option.profile_name.trim();
+    if (name && name !== "ChatGPT (SIWC)" && name !== "ChatGPT") return name;
+    return chatgptProfiles.length > 1
+      ? `ChatGPT ${chatgptProfiles.indexOf(option.profile_id) + 1}`
+      : "ChatGPT";
+  };
 
   useOutsideClick(rootRef, open, () => {
     setOpen(false);
@@ -174,9 +197,9 @@ export default function ModelSelector({
         : t("Models unavailable")
       : allowSystemDefault && !selectedSelection
         ? defaultLabel
-        : selectedOption?.model ||
-          selectedOption?.model_name ||
-          t("Select model");
+        : selectedOption
+          ? modelDisplayName(selectedOption)
+          : t("Select model");
   const menuPlacementClass =
     placement === "bottom" ? "top-full mt-1.5" : "bottom-full mb-1.5";
 
@@ -277,6 +300,7 @@ export default function ModelSelector({
                 <ModelOptionRow
                   key={optionKey}
                   option={option}
+                  secondaryLabel={secondaryLabel(option)}
                   selected={optionKey === selectedKey}
                   onSelect={() => {
                     onChange(optionSelection);
