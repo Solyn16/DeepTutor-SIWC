@@ -597,5 +597,22 @@
   "starters.research.3": "쟁점의 양쪽 입장 비교하기",
   "starters.research.3.prompt": "한 쟁점의 양쪽 입장에서 주요 주장과 근거, 각각의 전제를 정리하고 종합적인 판단을 제시해 주세요. 쟁점이 무엇인지 말하지 않았다면 먼저 물어봐 주세요.",
   "starters.research.4": "문헌 검토 개요 작성하기",
-  "starters.research.4.prompt": "한 주제의 문헌 검토 개요를 작성해 주세요. 배경, 연구를 분류할 틀, 절별 핵심 내용, 인용할 만한 자료 유형을 포함해 주세요. 주제와 목적을 말하지 않았다면 먼저 물어봐 주세요."
+  "starters.research.4.prompt": "한 주제의 문헌 검토 개요를 작성해 주세요. 배경, 연구를 분류할 틀, 절별 핵심 내용, 인용할 만한 자료 유형을 포함해 주세요. 주제와 목적을 말하지 않았다면 먼저 물어봐 주세요.",
+  "siwc.description": "Use your ChatGPT plan for eligible AI requests in DeepTutor. Sign in on this computer and allow ChatGPT plan usage. Embeddings and media generation need separate providers.",
+  "siwc.saveFirst": "Apply or discard pending settings changes before connecting ChatGPT or refreshing models.",
+  "siwc.planEnabled": "You're using your ChatGPT plan. Eligible requests use your plan allowance or permitted credits. Choose a ChatGPT (SIWC) model in Settings to begin. Manage usage in ChatGPT settings.",
+  "siwc.planDisabled": "Signed in. ChatGPT plan usage is disabled. Continue with ChatGPT again and authorize plan usage to enable AI requests.",
+  "siwc.revocationUnconfirmed": "Signed out locally. Remote revocation could not be confirmed; disconnect DeepTutor in ChatGPT Settings.",
+  "siwc.enabled": "ChatGPT plan enabled",
+  "siwc.identityOnly": "Signed in; plan usage disabled",
+  "siwc.disconnected": "Signed out",
+  "siwc.refreshModels": "Refresh models",
+  "siwc.signOut": "Sign out",
+  "siwc.cancel": "Cancel",
+  "siwc.manageUsage": "Manage usage",
+  "siwc.waiting": "Waiting for browser authorization…",
+  "siwc.openBrowser": "Open ChatGPT authorization",
+  "siwc.failed": "ChatGPT sign-in or request failed",
+  "siwc.title": "ChatGPT (SIWC)",
+  "siwc.continue": "Continue with ChatGPT"
 }
