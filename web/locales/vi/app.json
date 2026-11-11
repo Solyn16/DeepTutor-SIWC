@@ -6581,5 +6581,22 @@
   "settings.modelImport.unverified": "Một số mô hình không khai báo loại. Hãy kiểm tra trước khi dùng cho dịch vụ này.",
   "settings.modelImport.draftHint": "Mô hình được thêm vào bản nháp. Áp dụng thay đổi để lưu; mô hình mặc định được giữ nguyên.",
   "settings.modelImport.selected": "Đã chọn: {{count}}",
-  "language.korean": "한국어 (일부 번역)"
+  "language.korean": "한국어 (일부 번역)",
+  "siwc.description": "Use your ChatGPT plan for eligible AI requests in DeepTutor. Sign in on this computer and allow ChatGPT plan usage. Embeddings and media generation need separate providers.",
+  "siwc.saveFirst": "Apply or discard pending settings changes before connecting ChatGPT or refreshing models.",
+  "siwc.planEnabled": "You're using your ChatGPT plan. Eligible requests use your plan allowance or permitted credits. Choose a ChatGPT (SIWC) model in Settings to begin. Manage usage in ChatGPT settings.",
+  "siwc.planDisabled": "Signed in. ChatGPT plan usage is disabled. Continue with ChatGPT again and authorize plan usage to enable AI requests.",
+  "siwc.revocationUnconfirmed": "Signed out locally. Remote revocation could not be confirmed; disconnect DeepTutor in ChatGPT Settings.",
+  "siwc.enabled": "ChatGPT plan enabled",
+  "siwc.identityOnly": "Signed in; plan usage disabled",
+  "siwc.disconnected": "Signed out",
+  "siwc.refreshModels": "Refresh models",
+  "siwc.signOut": "Sign out",
+  "siwc.cancel": "Cancel",
+  "siwc.manageUsage": "Manage usage",
+  "siwc.waiting": "Waiting for browser authorization…",
+  "siwc.openBrowser": "Open ChatGPT authorization",
+  "siwc.failed": "ChatGPT sign-in or request failed",
+  "siwc.title": "ChatGPT (SIWC)",
+  "siwc.continue": "Continue with ChatGPT"
 }
