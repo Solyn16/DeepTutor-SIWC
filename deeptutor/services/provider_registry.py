@@ -146,6 +146,8 @@ PROVIDER_ALIASES = {
     "byteplusCodingPlan": "byteplus_coding_plan",
     "github-copilot": "github_copilot",
     "openai-codex": "openai_codex",
+    "openai-chatgpt": "openai_chatgpt",
+    "siwc": "openai_chatgpt",
     "codebuddy-code": "codebuddy",
     "codebuddy_code": "codebuddy",
     "workbuddy": "codebuddy",
@@ -481,6 +483,15 @@ PROVIDERS: tuple[ProviderSpec, ...] = (
         # This model rule also applies when GPT-5 is reached through a
         # generic OpenAI-compatible binding or gateway.
         model_overrides=_OPENAI_REASONING_OVERRIDES,
+    ),
+    ProviderSpec(
+        name="openai_chatgpt",
+        keywords=("openai_chatgpt", "siwc"),
+        env_key="",
+        display_name="ChatGPT (SIWC)",
+        backend="openai_chatgpt",
+        is_oauth=True,
+        default_api_base="https://api.openai.com/v1",
     ),
     ProviderSpec(
         name="openai_codex",
