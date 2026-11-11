@@ -20,12 +20,16 @@ def register(app: typer.Typer) -> None:
             ...,
             help=(
                 "Provider: openai-codex (OAuth login) | github-copilot "
-                "(GitHub device login) | codebuddy (validate CodeBuddy SDK auth)"
+                "(GitHub device login) | codebuddy (validate CodeBuddy SDK auth) | "
+                "openai-chatgpt (official SIWC)"
             ),
         ),
     ) -> None:
         """Authenticate or validate provider access."""
         key = provider.strip().lower().replace("-", "_")
+        if key in {"openai_chatgpt", "siwc"}:
+            maybe_run(_login_chatgpt())
+            return
         if key == "openai_codex":
             maybe_run(_login_openai_codex())
             return
@@ -36,8 +40,50 @@ def register(app: typer.Typer) -> None:
             maybe_run(_login_codebuddy())
             return
         raise typer.BadParameter(
-            f"Unknown provider `{provider}`. Supported: openai-codex, github-copilot, codebuddy"
+            f"Unknown provider `{provider}`. Supported: openai-chatgpt, openai-codex, github-copilot, codebuddy"
         )
+
+
+async def _login_chatgpt() -> None:
+    from deeptutor.services.chatgpt_auth import ChatGPTAuthError, get_chatgpt_auth_service
+
+    service = get_chatgpt_auth_service()
+    try:
+        saved = service.status()["accounts"]
+        registration_id = None
+        if saved:
+            for index, account in enumerate(saved, 1):
+                typer.echo(f"{index}. {account['label']} ({account['client_id']})")
+            selected = typer.prompt("Account number (0 to add an account)", default=0, type=int)
+            if not 0 <= selected <= len(saved):
+                raise typer.BadParameter("Choose a listed account number.")
+            if selected:
+                registration_id = saved[selected - 1]["id"]
+        started = await service.start_login(registration_id)
+        typer.echo("Continue with ChatGPT in your browser. Authorize plan usage to enable AI requests.")
+        if not webbrowser.open(started["authorize_url"]):
+            typer.echo(started["authorize_url"])
+        while True:
+            status = service.status()
+            if status["operation_state"] == "completed":
+                active = next(a for a in status["accounts"] if a["id"] == status["active_id"])
+                if not active["plan_enabled"]:
+                    typer.echo("Signed in. ChatGPT plan usage was not authorized; inference is disabled.")
+                    return
+                models = await asyncio.to_thread(service.publish_models, active["id"])
+                typer.echo(f"ChatGPT connected. {len(models)} models added to Settings.")
+                typer.echo("Eligible AI requests use your ChatGPT plan. Manage usage: https://chatgpt.com/settings/usage")
+                return
+            if status["operation_state"] in {"failed", "expired", "cancelled"}:
+                typer.echo(f"ChatGPT sign-in did not complete: {status['error_code'] or status['operation_state']}")
+                raise typer.Exit(1)
+            await asyncio.sleep(0.5)
+    except (asyncio.CancelledError, KeyboardInterrupt):
+        await service.cancel_login()
+        raise typer.Exit(130) from None
+    except ChatGPTAuthError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(1) from None
 
 
 async def _login_openai_codex() -> None:
