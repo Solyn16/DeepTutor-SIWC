@@ -984,6 +984,45 @@ async def start_openai_codex_oauth() -> dict[str, Any]:
         raise _codex_http_exception(exc) from None
 
 
+class ChatGPTAccountPayload(BaseModel):
+    registration_id: str | None = None
+
+
+@router.api_route("/providers/openai-chatgpt/{action}", methods=["GET", "POST"])
+async def chatgpt_siwc_action(
+    action: str, request: Request, payload: ChatGPTAccountPayload | None = None
+) -> dict:
+    from deeptutor.services.chatgpt_auth import ChatGPTAuthError, get_chatgpt_auth_service
+
+    _require_codex_oauth_actor()
+    # This flow's callback returns to the browser's own machine. Reject remote use
+    # explicitly rather than registering credentials on the wrong host.
+    if (
+        request.client is None
+        or request.client.host not in {"127.0.0.1", "::1"}
+        or request.url.hostname not in {"localhost", "127.0.0.1", "::1"}
+    ):
+        raise HTTPException(403, "ChatGPT SIWC requires DeepTutor running on this computer.")
+    if request.method == "GET" and action != "status":
+        raise HTTPException(405, "Use POST for this action.")
+    service = get_chatgpt_auth_service()
+    registration_id = payload.registration_id if payload else None
+    try:
+        if action == "status":
+            return await asyncio.to_thread(service.status)
+        if action == "start":
+            return await service.start_login(registration_id)
+        if action == "cancel":
+            return await service.cancel_login()
+        if action == "models":
+            return {"models": await asyncio.to_thread(service.publish_models, registration_id)}
+        if action == "logout" and registration_id:
+            return await asyncio.to_thread(service.logout, registration_id)
+        raise HTTPException(400, "Unknown SIWC action or missing account.")
+    except ChatGPTAuthError as exc:
+        raise HTTPException(exc.status, {"code": exc.code, "message": str(exc)}) from None
+
+
 @router.get("/providers/openai-codex/oauth/status")
 async def get_openai_codex_oauth_status() -> dict[str, Any]:
     _require_codex_oauth_actor()
