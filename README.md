@@ -1,3 +1,18 @@
+# DeepTutor-SIWC
+
+Personal fork of [HKUDS/DeepTutor](https://github.com/HKUDS/DeepTutor), based on v1.7.2.
+This fork adds Sign in with ChatGPT (SIWC), a local Docker configuration, settings
+return-path validation, and readable ChatGPT model names.
+
+**[中文使用说明 / SIWC quick start](README.SIWC.md)** ·
+[Implementation details](docs-for-dev/CHATGPT_SIWC.md)
+
+Build this source with `docker compose -f compose.siwc.yaml up -d --build` to use
+these additions. The upstream desktop and PyPI downloads linked below provide
+the upstream version. The original project documentation and license follow.
+
+---
+
 <div align="center">
 
 <p align="center"><img src="assets/figs/logo/color-full.png" alt="DeepTutor" width="480"></p>

@@ -1,0 +1,48 @@
+# Local Docker Desktop / Docker Engine deployment of this modified source tree.
+# Start: docker compose -f compose.siwc.yaml up -d --build
+# Open:  http://127.0.0.1:3782
+# Requires a single backend worker (the default in system.json).
+name: deeptutor-siwc
+
+services:
+  deeptutor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${DEEPTUTOR_DOCKER_FRONTEND_PORT:-3782}:${DEEPTUTOR_DOCKER_FRONTEND_PORT:-3782}"
+      # The browser and container must use exactly the same callback port.
+      - "127.0.0.1:${DEEPTUTOR_SIWC_CALLBACK_PORT:-1468}:${DEEPTUTOR_SIWC_CALLBACK_PORT:-1468}"
+    volumes:
+      - "${DEEPTUTOR_DATA_HOST:-./data}:/app/data"
+      - "${DEEPTUTOR_WORKSPACE_HOST:-./data/user/workspace}:/workspace"
+    environment:
+      DEEPTUTOR_SIWC_CALLBACK_LISTEN_HOST: "0.0.0.0"
+      DEEPTUTOR_SIWC_CALLBACK_PORT: "${DEEPTUTOR_SIWC_CALLBACK_PORT:-1468}"
+      DEEPTUTOR_SANDBOX_RUNNER_URL: http://sandbox-runner:8900
+      DEEPTUTOR_WORKSPACE_ROOT: /workspace
+      DEEPTUTOR_WORKSPACE_ALLOWED_ROOTS: /workspace
+    healthcheck:
+      test: ["CMD", "python", "/app/healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      sandbox-runner:
+        condition: service_healthy
+    networks:
+      - deeptutor-network
+
+  sandbox-runner:
+    extends:
+      file: docker-compose.yml
+      service: sandbox-runner
+    volumes:
+      - "${DEEPTUTOR_DATA_HOST:-./data}/cli-apps:/app/data/cli-apps:ro"
+
+networks:
+  deeptutor-network:
+    driver: bridge
