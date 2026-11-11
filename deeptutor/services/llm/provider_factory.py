@@ -86,6 +86,12 @@ def _build_runtime_provider(
         from deeptutor.services.llm.provider_core.typescript_provider import TypeScriptProvider
 
         provider = TypeScriptProvider(llm_config)
+    elif backend == "openai_chatgpt":
+        from deeptutor.services.llm.provider_core.openai_chatgpt_provider import (
+            OpenAIChatGPTProvider,
+        )
+
+        provider = OpenAIChatGPTProvider(default_model=llm_config.model)
     elif backend == "openai_codex":
         from deeptutor.services.llm.provider_core.openai_codex_provider import (
             OpenAICodexProvider,

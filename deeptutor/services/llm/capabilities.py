@@ -39,6 +39,12 @@ PROVIDER_CAPABILITIES: dict[str, dict[str, object]] = {
     "openai_codex": {
         "supports_vision": True,
     },
+    "openai_chatgpt": {
+        "supports_vision": True,
+        "supports_streaming": True,
+        "supports_tools": True,
+        "supports_response_format": True,
+    },
     # Custom / user-defined OpenAI-compatible endpoints
     "custom": {
         "supports_response_format": True,
